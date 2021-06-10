@@ -39,7 +39,7 @@ function hasData(req, res, next){
   )
 }
 
-function hasCorrectProperties(req,res,next){
+function hasRequiredProperties(req,res,next){
   const validKeys = ["first_name", "last_name", "mobile_number", "reservation_date", "reservation_time","people"]
   for(let i = 0; i< validKeys.length; i++){
     const key = validKeys[i]
@@ -51,26 +51,47 @@ function hasCorrectProperties(req,res,next){
         }
       )
     }
-    if(!res.locals.reservation[key].length){
+  }
+  next()
+}
+function datePropIsADate(req,res,next){
+  
+}
+function timePropIsATime(req,res,next){
+  
+}
+function hasNoEmptyProperties (req,res,next){
+  Object.entries(res.locals.reservation).forEach(([key, value]) => {
+    if(value === "" || value === null){
       next({
         status:400,
         message: `Request ${key} field must not be empty.`
       })
     }
-
-  }
+  })
   next()
 }
 
+function peopleIsNonZeroInteger(req,res,next){
+  if(Number.isInteger(res.locals.reservation.people) && res.locals.reservation.people !== 0){
+    return next()
+  }
+  next(
+    {
+      status: 400,
+      message: "New reservations must have people property that is an integer greater than 0"
+    }
+  )
+}
 
 async function create(req,res,next){
   const newReservation = res.locals.reservation
   const storedReservation = await service.create(newReservation)
-  res.status(201).json({ data: storedReservation})
+  res.status(201).json({ data: storedReservation[0] })
 }
 
 module.exports = {
   list: asyncErrorBoundary(list),
   read: asyncErrorBoundary(read),
-  create: [asyncErrorBoundary(hasData), asyncErrorBoundary(hasCorrectProperties), asyncErrorBoundary(create)],
+  create: [asyncErrorBoundary(hasData), asyncErrorBoundary(hasRequiredProperties), asyncErrorBoundary(hasNoEmptyProperties), asyncErrorBoundary(peopleIsNonZeroInteger), asyncErrorBoundary(create)],
 };
