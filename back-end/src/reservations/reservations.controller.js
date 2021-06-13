@@ -90,13 +90,14 @@ function hasNoEmptyProperties (req,res,next){
   next()
 }
 function peopleIsNonZeroInteger(req,res,next){
-  if(Number.isInteger(res.locals.reservation.people) && res.locals.reservation.people !== 0){
+  res.locals.reservation.people = parseInt(res.locals.reservation.people)
+  if( !Number.isNaN(res.locals.reservation.people) && res.locals.reservation.people !== 0){
     return next()
   }
   next(
     {
       status: 400,
-      message: "New reservations must have people property that is an integer greater than 0"
+      message: `New reservations must have people property that is an integer greater than 0`
     }
   )
 }
