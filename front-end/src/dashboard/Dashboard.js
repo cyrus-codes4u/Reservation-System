@@ -22,10 +22,9 @@ function Dashboard({ date }) {
       .catch(setReservationsError);
     return () => abortController.abort();
   }
-
-  const listItems = listReservations.map((reserve) => {
+  const listItems = reservations.map((reserve, index) => {
     return (
-      <li> 
+      <li key= {`id_${index}`} > 
         <p>Name: {reserve.last_name},{reserve.first_name} </p>
         <p>Date: {reserve.reservation_time}</p>
         <p>Time: {reserve.reservation_date} </p>
