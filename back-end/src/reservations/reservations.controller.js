@@ -73,7 +73,7 @@ function timePropIsATime(req,res,next){
   }
   next(
     {
-      status:400,
+      status: 400,
       message: `reservation_time: ${res.locals.reservation.reservation_time} is not a time`
     }
   )
@@ -90,8 +90,8 @@ function hasNoEmptyProperties (req,res,next){
   next()
 }
 function peopleIsNonZeroInteger(req,res,next){
-  res.locals.reservation.people = parseInt(res.locals.reservation.people)
-  if( !Number.isNaN(res.locals.reservation.people) && res.locals.reservation.people !== 0){
+  // res.locals.reservation.people = parseInt(res.locals.reservation.people)
+  if( Number.isInteger(res.locals.reservation.people) && res.locals.reservation.people !== 0){
     return next()
   }
   next(
@@ -101,10 +101,11 @@ function peopleIsNonZeroInteger(req,res,next){
     }
   )
 }
-function dateIsInFuture(req,res,next){
+function dateTimeIsInFuture(req,res,next){
   const today = new Date()
   const [year, month, day] = res.locals.reservation.reservation_date.split("-")
-  res.locals.reservationDateObject = new Date(year, month-1, day)
+  const [hour, minute] = res.locals.reservation.reservation_time.split(":")
+  res.locals.reservationDateObject = new Date(year, month-1, day, hour, minute)
   if(res.locals.reservationDateObject - today > 0){
     return next()
   }
@@ -115,7 +116,6 @@ function dateIsInFuture(req,res,next){
     }
   )
 }
-
 function dateIsNotTuesday(req,res,next){
   if( res.locals.reservationDateObject.getDay() !== 2){
     return next()
@@ -126,6 +126,36 @@ function dateIsNotTuesday(req,res,next){
       message: "The restaurant is closed on Tuesdays."
     }
   )
+}
+// function timeIsInFuture(req,res,next){
+//   const today = new Date()
+//   const [hour, minute] = res.locals.reservation.reservation_time.split(":")
+//   res.locals.reservationDateObject = new Date(year, month-1, day)
+//   if(res.locals.reservationDateObject - today > 0){
+//     return next()
+//   }
+//   next(
+//     {
+//       status:400,
+//       message: "Reservation date must be placed for a future time."
+//     }
+//   )
+// }
+function restaurantIsOpen(req,res,next){
+  const hour = res.locals.reservationDateObject.getHours()
+  const minute = res.locals.reservationDateObject.getMinutes()
+  if( (hour > 10 && hour < 21)
+    || (hour === 10 && minute >= 30)
+    || (hour === 21 && minute <=30) ){
+    return next()
+  }
+  next(
+    {
+      status: 400,
+      message: `Reservation_time: ${res.locals.reservation.reservation_time} is not during opening hours or is less than an hour before closing.`
+    }
+  )
+  
 }
 
 async function create(req,res,next){
@@ -138,5 +168,6 @@ module.exports = {
   read: asyncErrorBoundary(read),
   create: [asyncErrorBoundary(hasData), asyncErrorBoundary(hasRequiredProperties), asyncErrorBoundary(hasNoEmptyProperties),
     asyncErrorBoundary(datePropIsADate), asyncErrorBoundary(timePropIsATime), asyncErrorBoundary(peopleIsNonZeroInteger), 
-    asyncErrorBoundary(dateIsInFuture), asyncErrorBoundary(dateIsNotTuesday), asyncErrorBoundary(create)],
+    asyncErrorBoundary(dateTimeIsInFuture), asyncErrorBoundary(dateIsNotTuesday), asyncErrorBoundary(restaurantIsOpen), 
+    asyncErrorBoundary(create)],
 };
