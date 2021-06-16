@@ -14,7 +14,7 @@ async function list(req, res) {
  */
 async function read(req, res, next) {
   const {reservation_id} = req.params
-  const data = await service.read(reservation_id)
+  const data = await service.read( parseInt(reservation_id) )
   if(data){
     res.status(200).send({ data: data});
   }

@@ -10,7 +10,7 @@ function list(date){
 
 function read(id){
     return knex("reservations")
-        .select("first_name", "last_name", "mobile_number", "reservation_date", "reservation_time", "people")
+        .select("first_name", "last_name", "mobile_number", "reservation_date", "reservation_time", "people", "reservation_id")
         .where({reservation_id: id})
         .first()
 }
