@@ -5,7 +5,7 @@ exports.up = function(knex) {
         table.timestamps(true, true);
         table.string("table_name").notNullable();
         table.integer("capacity").notNullable();
-        table.integer("reservation_id").unsigned();
+        table.integer("reservation_id").defaultTo(null).unsigned();
         table
             .foreign("reservation_id")
             .references("reservation_id")
