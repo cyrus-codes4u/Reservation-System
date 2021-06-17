@@ -9,6 +9,7 @@ exports.seed = function (knex) {
         "reservation_date": "2020-12-31",
         "reservation_time": "20:00:00",
         "people": 6,
+        "status": "booked",
         "created_at": "2020-12-10T08:30:32.326Z",
         "updated_at": "2020-12-10T08:30:32.326Z"
       },
@@ -19,6 +20,7 @@ exports.seed = function (knex) {
         "reservation_date": "2020-12-30",
         "reservation_time": "20:00",
         "people": 1,
+        "status": "booked",
         "created_at": "2020-12-10T08:31:32.326Z",
         "updated_at": "2020-12-10T08:31:32.326Z"
       },
@@ -29,6 +31,7 @@ exports.seed = function (knex) {
         "reservation_date": "2020-12-30",
         "reservation_time": "18:00",
         "people": 1,
+        "status": "booked",
         "created_at": "2020-12-10T08:31:32.326Z",
         "updated_at": "2020-12-10T08:31:32.326Z"
       },
@@ -39,6 +42,7 @@ exports.seed = function (knex) {
         "reservation_date": "2025-12-30",
         "reservation_time": "18:00",
         "people": 3,
+        "status": "booked",
         "created_at": "2020-12-10T08:31:32.326Z",
         "updated_at": "2020-12-10T08:31:32.326Z"
       },
@@ -49,6 +53,7 @@ exports.seed = function (knex) {
         "reservation_date": "2026-12-30",
         "reservation_time": "18:00",
         "people": 2,
+        "status": "booked",
         "created_at": "2020-12-10T08:31:32.326Z",
         "updated_at": "2020-12-10T08:31:32.326Z"
       }
