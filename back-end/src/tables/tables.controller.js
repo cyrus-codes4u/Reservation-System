@@ -117,6 +117,30 @@ function tableUnoccupied (req,res,next) {
         }
     )
 }
+function resNotSeated(req,res,next){
+    if(res.locals.reservation.status === "booked"){
+        return next()
+    }
+    next(
+        {
+            status: 400,
+            message: `Reservation status: ${res.locals.reservation.status} shows group already seated.`
+        }
+    )
+}
+
+//DELETE Validation Middleware
+function tableOccupied (req,res,next){
+    if(res.locals.table.reservation_id !== null){
+        return next()
+    }
+    next(
+        {
+            status: 400,
+            message: `${res.locals.table.table_name} is currently not occupied.`
+        }
+    )
+}
 
 //Request handlers
 async function read (req,res,next) {
@@ -134,13 +158,18 @@ async function update(req,res,next) {
     const data = await service.update(res.locals.table.table_id, res.locals.data)
     res.status(200).send({data: data})
 }
+async function remove(req,res,next){
+    const data = await service.remove(res.locals.table.table_id)
+    res.status(200).send({data: data})
+}
 
 module.exports = {
     read: [asyncErrorBoundary(tableExists), asyncErrorBoundary(read)],
     list: asyncErrorBoundary(list),
+    remove: [asyncErrorBoundary(tableExists), asyncErrorBoundary(tableOccupied), asyncErrorBoundary(remove)],
     create: [asyncErrorBoundary(hasData), asyncErrorBoundary(hasRequiredProperties), asyncErrorBoundary(tableNameIsLongEnough),
         asyncErrorBoundary(capacityIsNonZero), asyncErrorBoundary(create)],
     update: [ asyncErrorBoundary(hasData), asyncErrorBoundary(tableExists), asyncErrorBoundary(tableUnoccupied), 
-        asyncErrorBoundary(hasResId), asyncErrorBoundary(resExists), asyncErrorBoundary(tableHasCapacity), 
-        asyncErrorBoundary(update)]
+        asyncErrorBoundary(hasResId), asyncErrorBoundary(resExists), asyncErrorBoundary(resNotSeated),
+        asyncErrorBoundary(tableHasCapacity), asyncErrorBoundary(update)]
 }
