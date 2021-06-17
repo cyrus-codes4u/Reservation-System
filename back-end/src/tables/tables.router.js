@@ -11,6 +11,7 @@ const methodNotAllowed = require("../errors/methodNotAllowed.js")
 
 router.route("/:table_id/seat")
     .put(controller.update)
+    .delete(controller.remove)
     .all(methodNotAllowed)
 
 router.route("/:table_id")
