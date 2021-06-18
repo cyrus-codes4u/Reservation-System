@@ -4,10 +4,12 @@ const asyncErrorBoundary = require("../errors/asyncErrorBoundary")
 
 //General Validation middleware
 function hasData(req, res, next){
+    //checks that the request body has any data
     if(req.body.data){
       res.locals.data = req.body.data
       return next()
     }
+    //otherwise passes error to error handler
     next(
       {
         status: 400,
@@ -16,11 +18,15 @@ function hasData(req, res, next){
     )
 }
 async function tableExists(req,res,next) {
+    //hooks into the request url paramaters to get :table_id
     const {table_id} = req.params
+    //if the request has :table_id find table with matching id in db
     res.locals.table = table_id ? await service.read(table_id) : null
+    //checks such a table exits
     if(res.locals.table){
         return next()
     }
+    //otherwise passes error to error handler
     next({
         status: 404,
         message: `Table with id: ${table_id} not found.`
@@ -29,10 +35,15 @@ async function tableExists(req,res,next) {
 
 //POST Validation Middleware
 function hasRequiredProperties(req,res,next){
+    //ensures that a request to create a new table has the required keys
+    // these are the required keys
     const validKeys = ["table_name", "capacity"]
+    //cycles through these keys
     for(let i = 0; i< validKeys.length; i++){
       const key = validKeys[i]
+      //checks that the request data contains these keys
       if(!res.locals.data[key]){
+        // passes error to error handler if a key is not in the request data
         next(
           {
             status: 400,
@@ -44,9 +55,11 @@ function hasRequiredProperties(req,res,next){
     next()
 }
 function tableNameIsLongEnough (req,res,next){
+    //checks that the new table has a table_name property that is at least 2 characters
     if( typeof(res.locals.data.table_name) === "string" && res.locals.data.table_name.length >= 2 ){
         return next()
     }
+    //otherwise passes error to error handler
     next(
         {
             status: 400,
@@ -55,9 +68,11 @@ function tableNameIsLongEnough (req,res,next){
     )
 }
 function capacityIsNonZero (req,res,next){
+    //checks that the capacity of a new table is at least 1
     if ( Number.isInteger(res.locals.data.capacity) && res.locals.data.capacity > 0 ) {
         return next()
     }
+    //otherwise passes error to error handler
     next(
         {
             status: 400,
@@ -68,9 +83,11 @@ function capacityIsNonZero (req,res,next){
 
 //PUT Validation Middleware
 function hasResId(req,res,next){
+    //checks that there is a reservation_id property in the request body data
     if( res.locals.data.reservation_id ){
         return next()
     }
+     //otherwise passes error to error handler
     next(
         {
             status:400,
@@ -79,11 +96,14 @@ function hasResId(req,res,next){
     )
 }
 async function resExists(req,res,next){
+    //makes a call to the database to find a reservation with reservation_id provided by request body data
     const reservation = await readReservation(res.locals.data.reservation_id)
+    //checks the response from database to see such a reservation exists
     if(reservation){
         res.locals.reservation = reservation
         return next()
     }
+    //otherwise passes error to error handler
     next(
         {
             status: 404,
@@ -93,12 +113,11 @@ async function resExists(req,res,next){
     
 }
 function tableHasCapacity(req,res,next){
-    
+    //Checks that the table has sufficient capacity for the number of people in the reservation
     if( res.locals.table.capacity >= res.locals.reservation.people){
         return next()
     }
-    console.log(res.locals.table.table_name)
-    console.log(res.locals.table.capacity)
+    //otherwise passes error to error handler
     next(
         {
             status: 400,
@@ -107,9 +126,11 @@ function tableHasCapacity(req,res,next){
     )
 }
 function tableUnoccupied (req,res,next) {
+    //checks that the table is not already occupied by another reservation
     if(res.locals.table.reservation_id === null){
         return next()
     }
+    //otherwise passes error to error handler
     next(
         {
             status: 400,
@@ -118,9 +139,11 @@ function tableUnoccupied (req,res,next) {
     )
 }
 function resNotSeated(req,res,next){
+    //checks that the reservation with request reservation_id is not already seated or finished
     if(res.locals.reservation.status === "booked"){
         return next()
     }
+    //otherwise passes error to error handler
     next(
         {
             status: 400,
@@ -131,9 +154,11 @@ function resNotSeated(req,res,next){
 
 //DELETE Validation Middleware
 function tableOccupied (req,res,next){
+    //ensures that the table to be cleared in fact has a reservation seated there currently
     if(res.locals.table.reservation_id !== null){
         return next()
     }
+    //otherwise passes error to error handler
     next(
         {
             status: 400,
