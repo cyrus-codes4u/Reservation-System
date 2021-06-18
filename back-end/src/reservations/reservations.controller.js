@@ -1,31 +1,49 @@
 const service = require("./reservations.service")
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary")
 
-/**
- * GET handler for all reservation entries
- */
-async function list(req, res) {
-  const {date = null} = req.query
-  const data = await service.list(date)
-  res.status(200).json({ data: data });
-}
-/**
- * GET handler for specific reservation
- */
-async function read(req, res, next) {
+//General Validation
+async function reservationExists(req,res,next){
   const {reservation_id} = req.params
-  const data = await service.read( parseInt(reservation_id) )
-  if(data){
-    res.status(200).send({ data: data});
+  const reservation = await service.read( parseInt(reservation_id) )
+  if(reservation){
+    res.locals.reservation = reservation
+    return next()
   }
   next(
     {
       status: 404,
-      message: `Reservation with ${reservation_id} not found.`
+      message: `Reservation with id ${reservation_id} not found.`
     }
   )
 }
 
+//PUT Validation Middleware
+function statusIsValid (req,res,next){
+  const statuses = ["booked", "seated", "finished"]
+  res.locals.updates = req.body.data
+  if( statuses.includes(res.locals.updates.status)){
+    return next()
+  }
+  next(
+    {
+      status: 400,
+      message: `New reservation status: ${res.locals.updates.status} is invalid.`
+    }
+  )
+}
+function reservationUnfinished(req,res,next){
+  if(res.locals.reservation.status === "finished"){
+    next(
+      {
+        status: 400,
+        message: "A finished reservation cannot have its status updated"
+      }
+    )
+  }
+  next()
+}
+
+//POST Validation Middleware
 function hasData(req, res, next){
   if(req.body.data){
     res.locals.reservation = req.body.data
@@ -127,20 +145,6 @@ function dateIsNotTuesday(req,res,next){
     }
   )
 }
-// function timeIsInFuture(req,res,next){
-//   const today = new Date()
-//   const [hour, minute] = res.locals.reservation.reservation_time.split(":")
-//   res.locals.reservationDateObject = new Date(year, month-1, day)
-//   if(res.locals.reservationDateObject - today > 0){
-//     return next()
-//   }
-//   next(
-//     {
-//       status:400,
-//       message: "Reservation date must be placed for a future time."
-//     }
-//   )
-// }
 function restaurantIsOpen(req,res,next){
   const hour = res.locals.reservationDateObject.getHours()
   const minute = res.locals.reservationDateObject.getMinutes()
@@ -157,17 +161,44 @@ function restaurantIsOpen(req,res,next){
   )
   
 }
+function statusIsBooked(req,res,next){
+  
+  if(!res.locals.reservation.status || res.locals.reservation.status === "booked"){
+    return next()
+  }
+  next(
+    {
+      status: 400,
+      message: `Status property: ${res.locals.reservation.status} invalid; must be 'booked'.`
+    }
+  )
+}
 
-async function create(req,res,next){
+
+async function list(req, res) {
+  const {date = null} = req.query
+  const data = await service.list(date)
+  res.status(200).json({ data: data });
+}
+async function read(req, res) {
+  res.status(200).send({ data: res.locals.reservation});
+}
+async function create(req,res){
   const storedReservation = await service.create(res.locals.reservation)
   res.status(201).json({ data: storedReservation[0] })
+}
+async function update(req,res){
+  const data = await service.update(res.locals.reservation.reservation_id, res.locals.updates)
+  res.status(200).json({ data: data })
 }
 
 module.exports = {
   list: asyncErrorBoundary(list),
-  read: asyncErrorBoundary(read),
+  read: [asyncErrorBoundary(reservationExists), asyncErrorBoundary(read)],
   create: [asyncErrorBoundary(hasData), asyncErrorBoundary(hasRequiredProperties), asyncErrorBoundary(hasNoEmptyProperties),
     asyncErrorBoundary(datePropIsADate), asyncErrorBoundary(timePropIsATime), asyncErrorBoundary(peopleIsNonZeroInteger), 
     asyncErrorBoundary(dateTimeIsInFuture), asyncErrorBoundary(dateIsNotTuesday), asyncErrorBoundary(restaurantIsOpen), 
-    asyncErrorBoundary(create)],
+    asyncErrorBoundary(statusIsBooked) , asyncErrorBoundary(create)],
+  update: [asyncErrorBoundary(reservationExists), asyncErrorBoundary(statusIsValid), asyncErrorBoundary(reservationUnfinished),
+    asyncErrorBoundary(update)]
 };
