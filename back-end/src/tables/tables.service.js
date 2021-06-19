@@ -22,7 +22,7 @@ function create(newTable){
 }
 
 //Updates the reservation_id property of a table and seats a reservation
-function update(id, resId){
+function update(id, updates){
     return knex.transaction ( (trx) => {
         return knex("reservations")
             .transacting(trx)
@@ -32,7 +32,7 @@ function update(id, resId){
                 //then the reservation_id property of the table is updated to matched the seated reservation
                 return knex("tables")
                     .where({table_id: id})
-                    .update(resId) 
+                    .update(updates) 
                     .returning(["table_name", "table_id", "capacity", "reservation_id"])                    
             })
     })
