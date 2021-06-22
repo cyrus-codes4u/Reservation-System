@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom"
 import { listReservations, listTables }  from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
-import useQuery from "../utils/useQuery";
-import { today, previous, next } from "../utils/date-time";
+import { previous, next } from "../utils/date-time";
 import ReservationList from "./ReservationList";
 import TableList from "./TablesList";
 
@@ -12,21 +12,18 @@ import TableList from "./TablesList";
  *  the date for which the user wants to view reservations.
  * @returns {JSX.Element}
  */
-function Dashboard() {
-  const queryParams = useQuery()
-  const initialDate = queryParams.get("date") ? queryParams.get("date") : today()
-  const [date, setDate] = useState(initialDate)
+function Dashboard({currentDate}) {
   const [reservations, setReservations] = useState([]);
   const [tables, setTables] = useState([])
   const [reservationsError, setReservationsError] = useState(null);
   const [tablesError, setTablesError] = useState(null);
 
-  useEffect(loadDashboard, [date]);
+  useEffect(loadReservations, [currentDate]);
 
-  function loadDashboard() {
+  function loadReservations() {
     const abortController = new AbortController()
     setReservationsError(null)
-    listReservations({ date }, abortController.signal)
+    listReservations({ date: currentDate }, abortController.signal)
       .then(setReservations)
       .catch(setReservationsError)
     return () => abortController.abort()
@@ -41,31 +38,17 @@ function Dashboard() {
       .catch(setTablesError)
     return () => abortController.abort()
   }
-
   
-
   return (
     <main>
       <h1>Dashboard</h1>
       <div className="d-md-flex mb-3">
-        <h4 className="mb-0">Reservations for {date}</h4>
+        <h4 className="mb-0">Reservations for {currentDate}</h4>
         <ErrorAlert error={reservationsError} />
         <ReservationList reservations={reservations} />
       </div>
-      <button 
-        type="button" 
-        className="btn btn-secondary"
-        onClick={() => setDate(previous(date))}
-      >
-        Previous Day
-      </button>
-      <button 
-        type="button" 
-        className="btn btn-primary"
-        onClick={() => setDate(next(date))}
-      >
-        Next Day
-      </button>
+      <Link to={`/dashboard?date=${previous(currentDate)}`} className="btn btn-secondary">Previous Day</Link>
+      <Link to={`/dashboard?date=${next(currentDate)}`} className="btn btn-primary">Next Day</Link>
       <div className ="d-md-flex mb-3">
         <h4 className="mb-0">Tables</h4>
         <ErrorAlert error={tablesError} />
