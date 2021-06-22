@@ -65,7 +65,7 @@ function hasData(req, res, next){
   )
 }
 function hasRequiredProperties(req,res,next){
-  const validKeys = ["first_name", "last_name", "mobile_number", "reservation_date", "reservation_time","people"]
+  const validKeys = ["first_name", "last_name", "mobile_number", "reservation_date", "reservation_time", "people"]
   for(let i = 0; i< validKeys.length; i++){
     const key = validKeys[i]
     if(!res.locals.newReservation[key]){
@@ -116,8 +116,9 @@ function hasNoEmptyProperties (req,res,next){
   next()
 }
 function peopleIsNonZeroInteger(req,res,next){
-  // res.locals.reservation.people = parseInt(res.locals.reservation.people)
-  if( Number.isInteger(res.locals.newReservation.people) && res.locals.newReservation.people !== 0){
+  const people = parseInt(res.locals.newReservation.people)
+  if( !Number.isNaN(people) && people !== 0){
+    res.locals.newReservation.people = people
     return next()
   }
   next(
@@ -172,6 +173,7 @@ function restaurantIsOpen(req,res,next){
 function statusIsBooked(req,res,next){
   
   if(!res.locals.newReservation.status || res.locals.newReservation.status === "booked"){
+    res.locals.newReservation.status= "booked"
     return next()
   }
   next(
@@ -185,15 +187,21 @@ function statusIsBooked(req,res,next){
 
 async function list(req, res) {
   const {date, mobile_number} = req.query
-  const data = date ? await service.list(date) : await service.search(mobile_number)
-  res.status(200).json({ data: data });
+  if(date){
+    const data = await service.list(date)
+    res.status(200).send({ data: data });
+  }
+  if(mobile_number){
+    const data = await service.search(mobile_number)
+    res.status(200).send({ data: data })
+  }
 }
 async function read(req, res) {
   res.status(200).send({ data: res.locals.reservation});
 }
 async function create(req,res){
   const storedReservation = await service.create(res.locals.newReservation)
-  res.status(201).json({ data: storedReservation[0] })
+  res.status(201).send({ data: storedReservation[0] })
 }
 async function update(req,res){
   if(res.locals.newReservation){
