@@ -131,6 +131,10 @@ export async function createReservation(reservation, signal) {
 }
 /**
  * Seats a reservation at a table
+ * @param reservation_id
+ * the id of the reservation that is being seated
+ * @param table_id
+ * the id of the table at which they are being seated
  * @returns {Promise<[table]>}
  *  a promise that resolves to the table with updated reservation_id property.
  */
@@ -139,6 +143,21 @@ export async function seatReservation(reservation_id, table_id) {
   const options = {
     method: "PUT",
     body: JSON.stringify({ data: { reservation_id: reservation_id } }),
+    headers,
+  };
+  return await fetchJson(url, options, {});
+}
+/**
+ * Finishes a reservation at a table
+ * @param table_id
+ * the id of the table at which they are being seated
+ * @returns {Promise<[table]>}
+ *  a promise that resolves to the table with updated reservation_id property.
+ */
+ export async function finishReservation(table_id) {
+  const url = `${API_BASE_URL}/tables/${table_id}/seat`;
+  const options = {
+    method: "DELETE",
     headers,
   };
   return await fetchJson(url, options, {});
