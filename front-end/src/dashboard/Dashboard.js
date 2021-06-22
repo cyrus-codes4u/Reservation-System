@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import { listReservations, listTables }  from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 import useQuery from "../utils/useQuery";
-import { today, previous, next, formatAsTime } from "../utils/date-time";
+import { today, previous, next } from "../utils/date-time";
+import ReservationList from "./ReservationList";
+import TableList from "./TablesList";
 
 /**
  * Defines the dashboard page.
@@ -40,23 +42,7 @@ function Dashboard() {
     return () => abortController.abort()
   }
 
-  const listOfReservations = reservations ? reservations.map((reserve, index) => {
-    return (
-      <li key= {`id_${index}`} > 
-        <p>Name: {reserve.last_name}, {reserve.first_name} </p>
-        <p>Date: {reserve.reservation_date}</p>
-        <p>Time: {formatAsTime(reserve.reservation_time)} </p>
-        <p>Party of {reserve.people}</p>
-      </li>
-    )
-  }) : null
-
-  const listOfTables = tables ? tables.map((table,index) => {
-    const available = table.reservation_id ? "Occupied" : "Free"
-    return (
-      <li key={`table_${index}`} data-table-id-status={table.table_id}> {table.table_name} : {available}</li>
-    )
-  }) : null
+  
 
   return (
     <main>
@@ -64,9 +50,7 @@ function Dashboard() {
       <div className="d-md-flex mb-3">
         <h4 className="mb-0">Reservations for {date}</h4>
         <ErrorAlert error={reservationsError} />
-        <ol>
-          {listOfReservations}
-        </ol>
+        <ReservationList reservations={reservations} />
       </div>
       <button 
         type="button" 
@@ -85,9 +69,7 @@ function Dashboard() {
       <div className ="d-md-flex mb-3">
         <h4 className="mb-0">Tables</h4>
         <ErrorAlert error={tablesError} />
-        <ul>
-          {listOfTables}
-        </ul>
+        <TableList tables={tables} />
       </div>
     </main>
   );
