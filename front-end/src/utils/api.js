@@ -53,12 +53,28 @@ async function fetchJson(url, options, onCancel) {
 }
 
 /**
+ * Retrieves reservation with matching id
+ * @param id
+ * the id of reservation to match.
+ * @returns {Promise<[reservation]>}
+ *  a promise that resolves to a possibly empty array of reservation saved in the database.
+ */
+
+export async function readReservation(id, signal) {
+  const url = new URL(`${API_BASE_URL}/reservations/${id}`);
+  
+  return await fetchJson(url, {headers, signal}, {})
+    .then(formatReservationDate)
+    .then(formatReservationTime);
+}
+
+/**
  * Retrieves all existing reservation.
  * @returns {Promise<[reservation]>}
  *  a promise that resolves to a possibly empty array of reservation saved in the database.
  */
 
-export async function listReservations(params, signal) {
+ export async function listReservations(params, signal) {
   const url = new URL(`${API_BASE_URL}/reservations`);
   Object.entries(params).forEach(([key, value]) =>
     url.searchParams.append(key, value.toString())
@@ -122,7 +138,7 @@ export async function seatReservation(reservation_id, table_id) {
   const url = `${API_BASE_URL}/tables/${table_id}/seat`;
   const options = {
     method: "PUT",
-    body: JSON.stringify({ data: { reservation_id } }),
+    body: JSON.stringify({ data: { reservation_id: reservation_id } }),
     headers,
   };
   return await fetchJson(url, options, {});
