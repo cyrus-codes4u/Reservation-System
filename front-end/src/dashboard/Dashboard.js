@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom"
-import { listReservations, listTables }  from "../utils/api";
+import { listReservations, listTables, finishReservation }  from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 import { previous, next } from "../utils/date-time";
 import ReservationList from "./ReservationList";
@@ -38,6 +38,16 @@ function Dashboard({currentDate}) {
       .catch(setTablesError)
     return () => abortController.abort()
   }
+
+  const handleFinish = (tableId) => {
+    console.log(tableId)
+    const response = window.confirm("Are you sure you want to finish this table? \n This action cannot be undone.")
+    if(response){
+    finishReservation(tableId)
+      .then(console.log)
+      .then(loadTables)
+    }
+  }
   
   return (
     <main>
@@ -52,7 +62,7 @@ function Dashboard({currentDate}) {
       <div className ="d-md-flex mb-3">
         <h4 className="mb-0">Tables</h4>
         <ErrorAlert error={tablesError} />
-        <TableList tables={tables} />
+        <TableList tables={tables} finish={handleFinish}/>
       </div>
     </main>
   );
