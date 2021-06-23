@@ -6,7 +6,6 @@ import { formatAsTime } from "../utils/date-time";
 function ReservationList({reservations}){
     if(!reservations) {return null}
     const listOfReservations = reservations.map((reservation, index) => {
-      if(reservation.status === "finished") { return null }
       return (
         <li key= {`id_${index}`} > 
           <p>Name: {reservation.last_name}, {reservation.first_name} </p>
