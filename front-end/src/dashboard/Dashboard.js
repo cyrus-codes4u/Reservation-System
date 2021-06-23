@@ -40,12 +40,11 @@ function Dashboard({currentDate}) {
   }
 
   const handleFinish = (tableId) => {
-    console.log(tableId)
     const response = window.confirm("Are you sure you want to finish this table? \n This action cannot be undone.")
     if(response){
     finishReservation(tableId)
-      .then(console.log)
       .then(loadTables)
+      .then(loadReservations)
     }
   }
   

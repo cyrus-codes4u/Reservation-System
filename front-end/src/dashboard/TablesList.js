@@ -1,5 +1,4 @@
 import React from "react";
-import { finishReservation } from "../utils/api"
 
 function TableList ({tables, finish}) {
     if(!tables) {return null}
