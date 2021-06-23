@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { useHistory, useParams } from "react-router";
+import { useHistory } from "react-router";
 import ErrorAlert from "../layout/ErrorAlert";
 import { listTables, readReservation, seatReservation } from "../utils/api"
 
@@ -41,8 +41,13 @@ function SeatReservation({reservation_id}){
     }
     const handleSubmit = (event) => {
         event.preventDefault()
-        seatReservation(reservation_id, formState)
-            .then(()=> history.push("/dashboard"))
+        console.log(formState)
+        if(formState.table_id === null){
+            setTablesError('You must choose one of the tables')
+        }else{
+            seatReservation(reservation_id, formState)
+                .then(()=> history.push("/dashboard"))
+        }
     }
     if(!reservation){return null}
 
@@ -61,6 +66,7 @@ function SeatReservation({reservation_id}){
             <h4>Select a table:</h4>
             <form onSubmit={handleSubmit}>
                 <select name = "table_id" onChange={updateForm} required >
+                    <option value={null}>Choose a Table</option>
                     {listOfTableOptions}
                 </select>
                 <button type="submit">Submit</button>

@@ -12,9 +12,9 @@ function CreateReservation(){
         reservation_date: today(),
         reservation_time: "",
         people: 0,
+        status: "booked"
     }
     const [formState, setFormState] = useState({...initialFormState})
-    const [error, setError] = useState(null);
     const history = useHistory()
 
     const updateForm = ({target}) => {
@@ -23,41 +23,45 @@ function CreateReservation(){
     const submitHandle = (event) => {
         event.preventDefault()
         createReservation(formState)
-            .then(() => history.push("/dashboard"))
-            .catch(setError)
-        
+            .then(() => history.push(`/dashboard?date=${formState.reservation_date}`))
     }
     const cancelHandle = () => {
         history.goBack()
     }
 
-    const noTuesdays = (event) => {
-        const day = new Date( event.target.value )
-        if( day.getDay() === 2 ){
-            setError("The restaurant is closed on Tuesdays. Please choose another date.")
-        }
-        if( day < new Date()  ){
-            setError( (error) => error + "\nYour chosen reservation date is in the past. Please choose a future date and time." )
-        } 
+
+    // const noTuesdays = (target) => { 
+    //     const [year, month , day] = target.value.split("-")
         
-    }
+    //     console.log(year, month, day)
+    //     const date = new Date( year, month-1, day )
+    //     if( date.getDay() === 2 ){
+    //         setErrors( new Error("The restaurant is closed on Tuesdays. Please choose another date.")  )
+    //     }
+    //     if ( date < new Date()){
+    //         setErrors( new Error("New reservations must be scheduled for a future date.")  )
+    //     }else{
+    //         setErrors(null)
+    //     }
+    // }
     
-    const openHours = (event) => {
-        const [hour, minute] = event.target.value.split(":")
-        if( parseInt(hour) > 21 || (parseInt(hour) >= 21 && parseInt(minute) >= 30) ){
-            setError( (error) => error + "\nThe restaurant is closes at 10:30 PM. To allow adequate dining time we do not accept reservations for after 9:30 PM.")
-        }
-        if( parseInt(hour) < 10 || (parseInt(hour) <= 10 && parseInt(minute) <= 30) ){
-            setError( (error) => error + "\nYour chosen reservation time is prior to restaurant opening. Please choose a time within opening hours." )
-        } 
-        else {
-            updateForm(event)
-        }
-    }
-    
+    // const openHours = (event) => {
+    //     const [hour, minute] = event.target.value.split(":")
+    //     if( parseInt(hour) > 21 || (parseInt(hour) >= 21 && parseInt(minute) >= 30) ){
+    //         setError( (error) => error + "\nThe restaurant is closes at 10:30 PM. To allow adequate dining time we do not accept reservations for after 9:30 PM.")
+    //     }
+    //     if( parseInt(hour) < 10 || (parseInt(hour) <= 10 && parseInt(minute) <= 30) ){
+    //         setError( (error) => error + "\nYour chosen reservation time is prior to restaurant opening. Please choose a time within opening hours." )
+    //     } 
+    //     else {
+    //         updateForm(event)
+    //     }
+    // }
+    // const errors = error.map((err, index) => { 
+    //     return (<li key={`err_${index}`}><ErrorAlert  error = {err} /> </li> ) 
+    // })
+
     return (
-        <React.Fragment>
-            <ErrorAlert error ={error} />
             <form onSubmit={submitHandle}>
                 <label htmlFor="first_name">First Name</label>
                 <input 
@@ -68,8 +72,8 @@ function CreateReservation(){
                     onChange={updateForm}
                     required
                     autoFocus
-                    autoCapitalize
-                    autoComplete
+                    autoCapitalize="true"
+                    autoComplete="true"
                 />
                 <label htmlFor="last_name">Last Name</label>
                 <input 
@@ -79,8 +83,8 @@ function CreateReservation(){
                     value = {formState.last_name}
                     onChange={updateForm}
                     required
-                    autoCapitalize
-                    autoComplete
+                    autoCapitalize="true"
+                    autoComplete="true"
                 />
                 <label htmlFor="mobile_number">Mobile Phone</label>
                 <input
@@ -92,7 +96,7 @@ function CreateReservation(){
                     onChange={updateForm}
                     pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
                     required
-                    autoComplete
+                    autoComplete="true"
                 />
                 <label htmlFor="reservation_date">Date</label>
                 <input
@@ -110,7 +114,7 @@ function CreateReservation(){
                     id ="reservation_time"
                     type ="time"
                     value = {formState.reservation_time}
-                    onChange={openHours}
+                    onChange={updateForm}
                     required
                 />
                 <label htmlFor="people">Party Size</label>
@@ -127,7 +131,7 @@ function CreateReservation(){
                 <button type="submit">Submit</button>
                 <button type="button" onClick={cancelHandle}>Cancel</button>
             </form>
-        </React.Fragment>
+        
     )
 }
 
