@@ -16,53 +16,55 @@ function CreateReservation(){
     }
     const [formState, setFormState] = useState({...initialFormState})
     const history = useHistory()
+    const [validation, setValidation] = useState([])
 
     const updateForm = ({target}) => {
         setFormState({...formState, [target.name]: target.value})
     }
-    const submitHandle = (event) => {
-        event.preventDefault()
+    const submitHandle = () => {
         createReservation(formState)
             .then(() => history.push(`/dashboard?date=${formState.reservation_date}`))
+            .catch(console.log)
     }
     const cancelHandle = () => {
         history.goBack()
     }
 
+    const noTuesdays = () => { 
+        const [year, month , day] = formState.reservation_date.split("-")
+        const date = new Date( year, month-1, day )
 
-    // const noTuesdays = (target) => { 
-    //     const [year, month , day] = target.value.split("-")
-        
-    //     console.log(year, month, day)
-    //     const date = new Date( year, month-1, day )
-    //     if( date.getDay() === 2 ){
-    //         setErrors( new Error("The restaurant is closed on Tuesdays. Please choose another date.")  )
-    //     }
-    //     if ( date < new Date()){
-    //         setErrors( new Error("New reservations must be scheduled for a future date.")  )
-    //     }else{
-    //         setErrors(null)
-    //     }
-    // }
+        if( date.getDay() === 2 ){
+            setValidation([...validation, "The restaurant is closed on Tuesdays. Please choose another date."])
+        }
+        if ( date < new Date()){
+            setValidation([...validation, "New reservations must be scheduled for a future date."])
+        }
+    }
     
-    // const openHours = (event) => {
-    //     const [hour, minute] = event.target.value.split(":")
-    //     if( parseInt(hour) > 21 || (parseInt(hour) >= 21 && parseInt(minute) >= 30) ){
-    //         setError( (error) => error + "\nThe restaurant is closes at 10:30 PM. To allow adequate dining time we do not accept reservations for after 9:30 PM.")
-    //     }
-    //     if( parseInt(hour) < 10 || (parseInt(hour) <= 10 && parseInt(minute) <= 30) ){
-    //         setError( (error) => error + "\nYour chosen reservation time is prior to restaurant opening. Please choose a time within opening hours." )
-    //     } 
-    //     else {
-    //         updateForm(event)
-    //     }
-    // }
+    const openHours = () => {
+        const [hour, minute] = formState.reservation_time.split(":")
+        if( parseInt(hour) > 21 || (parseInt(hour) >= 21 && parseInt(minute) >= 30) ){
+            setValidation([...validation,"The restaurant is closes at 10:30 PM. To allow adequate dining time we do not accept reservations for after 9:30 PM."])
+        }
+        if( parseInt(hour) < 10 || (parseInt(hour) <= 10 && parseInt(minute) <= 30) ){
+            setValidation([...validation,"Your chosen reservation time is prior to restaurant opening. Please choose a time within opening hours."])
+        }
+    }
     // const errors = error.map((err, index) => { 
     //     return (<li key={`err_${index}`}><ErrorAlert  error = {err} /> </li> ) 
     // })
 
     return (
-            <form onSubmit={submitHandle}>
+        <React.Fragment>
+            <ErrorAlert error ={validation.length ? validation.join("\n"): null} />
+            <form onSubmit={((e) =>{
+                e.preventDefault()
+                setValidation([])
+                noTuesdays()
+                openHours()
+                submitHandle()
+            })}>
                 <label htmlFor="first_name">First Name</label>
                 <input 
                     name="first_name"
@@ -131,7 +133,8 @@ function CreateReservation(){
                 <button type="submit">Submit</button>
                 <button type="button" onClick={cancelHandle}>Cancel</button>
             </form>
-        
+            {formState.reservation_date}
+        </React.Fragment>
     )
 }
 
