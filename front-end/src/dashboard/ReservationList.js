@@ -5,17 +5,21 @@ import { formatAsTime } from "../utils/date-time";
 
 function ReservationList({reservations}){
     if(!reservations) {return null}
-    const listOfReservations = reservations.map((reserve, index) => {
-        return (
-          <li key= {`id_${index}`} > 
-            <p>Name: {reserve.last_name}, {reserve.first_name} </p>
-            <p>Date: {reserve.reservation_date}</p>
-            <p>Time: {formatAsTime(reserve.reservation_time)} </p>
-            <p>Party of {reserve.people}</p>
-            <Link className="btn btn-primary" to={`/reservations/${reserve.reservation_id}/seat`}>Seat</Link>
-          </li>
-        )
-      })
+    const listOfReservations = reservations.map((reservation, index) => {
+      if(reservation.status === "finished") { return null }
+      return (
+        <li key= {`id_${index}`} > 
+          <p>Name: {reservation.last_name}, {reservation.first_name} </p>
+          <p>Date: {reservation.reservation_date}</p>
+          <p>Time: {formatAsTime(reservation.reservation_time)} </p>
+          <p>Party of {reservation.people}</p>
+          <p data-reservation-id-status={reservation.reservation_id}>Status: {reservation.status} </p>
+          {reservation.status==="booked" ? 
+            <Link className="btn btn-primary" to={`/reservations/${reservation.reservation_id}/seat`}>Seat</Link>
+            : null }
+        </li>
+      )
+    })
 
     return(
         <ol>
