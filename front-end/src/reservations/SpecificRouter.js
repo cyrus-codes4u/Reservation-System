@@ -20,10 +20,10 @@ import SeatReservation from "./SeatReservation";
             
             <Switch>
                 <Route exact={true} path={`${url}/seat`}>
-                    <SeatReservation reservation_id={reservation_id}/>
+                    <SeatReservation reservation_id={reservation_id} />
                 </Route>
                 <Route path={`${url}/status`}>
-                    <p>TO BE COMPLETED</p>
+                    <EditReservation reservation_id={reservation_id} />
                 </Route>
             </Switch>
         </React.Fragment>
