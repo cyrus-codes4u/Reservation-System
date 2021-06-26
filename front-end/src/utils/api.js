@@ -63,7 +63,7 @@ async function fetchJson(url, options, onCancel) {
 export async function readReservation(id, signal) {
   const url = new URL(`${API_BASE_URL}/reservations/${id}`);
   
-  return await fetchJson(url, {headers, signal}, {})
+  return await fetchJson(url, {method: "GET", headers, signal}, {})
     .then(formatReservationDate)
     .then(formatReservationTime);
 }
@@ -101,18 +101,41 @@ export async function createReservation(reservation, signal) {
 }
 
 /**
- * Updates the status of a reservation
+ * Updates a reservation
  * @param reservation_id
  * the id of the reservation to be updated
- * @returns {Promise<[table]>}
- *  a promise that resolves to the table with updated reservation_id property.
+ * @param updates
+ * updated data for reservation in key-value format. 
+ * @returns {Promise<[reservation]>}
+ *  a promise that resolves to the updated reservation.
  */
- export async function updateReservationStatus(reservation_id, status, signal) {
+ export async function updateReservation(reservation_id, updates, signal) {
+  const url = `${API_BASE_URL}/reservations/${reservation_id}`;
+  const options = {
+    method: "PUT",
+    body: JSON.stringify({ data: updates }),
+    headers,
+    signal
+  };
+  return await fetchJson(url, options, {});
+}
+
+/**
+ * Updates the status of a reservation
+ * @param reservation_id
+ * the id of the reservation to be updated.
+ * @param newStatus
+ * updated status to which the status property of the reservation will be set. 
+ * @returns {Promise<[reservation]>}
+ *  a promise that resolves to the updated reservation.
+ */
+ export async function updateReservationStatus(reservation_id, newStatus, signal) {
   const url = `${API_BASE_URL}/reservations/${reservation_id}/status`;
   const options = {
     method: "PUT",
-    body: JSON.stringify({ data: status }),
+    body: JSON.stringify({ data: {status: newStatus } }),
     headers,
+    signal
   };
   return await fetchJson(url, options, {});
 }
