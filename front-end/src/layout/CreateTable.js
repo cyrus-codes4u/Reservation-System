@@ -25,7 +25,7 @@ function CreateTable(){
     }
     
     return (
-        <React.Fragment>
+        <main>
             <form onSubmit={submitHandle}>
                 <label htmlFor="table_name">Table Name</label>
                 <input 
@@ -51,7 +51,7 @@ function CreateTable(){
                 <button type="submit">Submit</button>
                 <button type="button" onClick={cancelHandle}>Cancel</button>
             </form>
-        </React.Fragment>
+        </main>
     )
 }
 

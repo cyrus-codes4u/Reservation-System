@@ -15,13 +15,17 @@ function CreateReservation(){
         status: "booked"
     }
     const [formState, setFormState] = useState({...initialFormState})
-    const history = useHistory()
     const [validation, setValidation] = useState([])
+    const history = useHistory()
 
     const updateForm = ({target}) => {
         setFormState({...formState, [target.name]: target.value})
     }
-    const submitHandle = () => {
+    const submitHandle = (event) => {
+        event.preventDefault()
+        setValidation([])
+        noTuesdays()
+        openHours()
         createReservation(formState)
             .then(() => history.push(`/dashboard?date=${formState.reservation_date}`))
             .catch(console.log)
@@ -51,20 +55,11 @@ function CreateReservation(){
             setValidation([...validation,"Your chosen reservation time is prior to restaurant opening. Please choose a time within opening hours."])
         }
     }
-    // const errors = error.map((err, index) => { 
-    //     return (<li key={`err_${index}`}><ErrorAlert  error = {err} /> </li> ) 
-    // })
 
     return (
-        <React.Fragment>
+        <main>
             <ErrorAlert error ={validation.length ? validation.join("\n"): null} />
-            <form onSubmit={((e) =>{
-                e.preventDefault()
-                setValidation([])
-                noTuesdays()
-                openHours()
-                submitHandle()
-            })}>
+            <form onSubmit={submitHandle}>
                 <label htmlFor="first_name">First Name</label>
                 <input 
                     name="first_name"
@@ -134,7 +129,7 @@ function CreateReservation(){
                 <button type="button" onClick={cancelHandle}>Cancel</button>
             </form>
             {formState.reservation_date}
-        </React.Fragment>
+        </main>
     )
 }
 

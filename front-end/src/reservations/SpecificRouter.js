@@ -2,6 +2,7 @@ import React from "react";
 
 import { Route, Switch, useRouteMatch, useParams } from "react-router-dom";
 import SeatReservation from "./SeatReservation";
+import EditReservation from "./EditReservation";
 
 /**
  * Defines routes beginning with '/reservation' for the application.
@@ -16,17 +17,14 @@ import SeatReservation from "./SeatReservation";
     
     
     return (
-        <React.Fragment>
-            
-            <Switch>
-                <Route exact={true} path={`${url}/seat`}>
-                    <SeatReservation reservation_id={reservation_id} />
-                </Route>
-                <Route path={`${url}/status`}>
-                    <EditReservation reservation_id={reservation_id} />
-                </Route>
-            </Switch>
-        </React.Fragment>
+        <Switch>
+            <Route exact={true} path={`${url}/seat`}>
+                <SeatReservation reservation_id={reservation_id} />
+            </Route>
+            <Route path={`${url}/edit`}>
+                <EditReservation reservation_id={reservation_id} />
+            </Route>
+        </Switch>
     )
 }
 

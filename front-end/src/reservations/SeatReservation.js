@@ -41,7 +41,6 @@ function SeatReservation({reservation_id}){
     }
     const handleSubmit = (event) => {
         event.preventDefault()
-        console.log(formState)
         if(formState.table_id === null){
             setTablesError('You must choose one of the tables')
         }else{
@@ -59,7 +58,7 @@ function SeatReservation({reservation_id}){
     })
 
     return  (
-        <React.Fragment>
+        <main>
             <ErrorAlert error={reservationError} />
             <ErrorAlert error={tablesError} />
             <h2>{reservation ? reservation.first_name : null}'s reservation for {reservation.people}</h2>
@@ -72,7 +71,7 @@ function SeatReservation({reservation_id}){
                 <button type="submit">Submit</button>
                 <button type="button" onClick={handleCancel}>Cancel</button>
             </form>
-        </React.Fragment>
+        </main>
         
         
     )

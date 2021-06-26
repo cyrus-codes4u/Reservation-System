@@ -25,7 +25,7 @@ function SearchMobile(){
     }
     
     return(
-        <React.Fragment>
+        <main>
             <form onSubmit={submitHandle}>
                 <label htmlFor="mobile_number">Enter a customer's phone number</label>
                 <input
@@ -42,7 +42,7 @@ function SearchMobile(){
             </form>
             <ErrorAlert error={reservationsError} />
             {reservations.length ? <ReservationList reservations={reservations} /> : <p>No reservations found</p>}
-        </React.Fragment>
+        </main>
     )
 }
 
